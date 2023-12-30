@@ -1,4 +1,4 @@
-from docx2pdf import __version__
+from docx2doc import __version__
 
 
 def test_version():

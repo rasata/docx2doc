@@ -1,3 +1,4 @@
 format:
-	prettier --write --parser babel docx2pdf/convert.jxa
-	black docx2pdf/__init__.py
+	prettier --write --parser babel docx2doc/convert.jxa
+	black docx2doc/__init__.py
+l

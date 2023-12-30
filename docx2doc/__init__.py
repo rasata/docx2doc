@@ -17,20 +17,21 @@ def windows(paths, keep_active):
     import win32com.client
 
     word = win32com.client.Dispatch("Word.Application")
-    wdFormatPDF = 17
+    # https://learn.microsoft.com/fr-fr/office/vba/api/word.wdsaveformat
+    wdformatdocument = 0
 
     if paths["batch"]:
         for docx_filepath in tqdm(sorted(Path(paths["input"]).glob("[!~]*.doc*"))):
-            pdf_filepath = Path(paths["output"]) / (str(docx_filepath.stem) + ".pdf")
+            doc_filepath = Path(paths["output"]) / (str(docx_filepath.stem) + ".doc")
             doc = word.Documents.Open(str(docx_filepath))
-            doc.SaveAs(str(pdf_filepath), FileFormat=wdFormatPDF)
+            doc.SaveAs(str(doc_filepath), FileFormat=wdformatdocument)
             doc.Close(0)
     else:
         pbar = tqdm(total=1)
         docx_filepath = Path(paths["input"]).resolve()
-        pdf_filepath = Path(paths["output"]).resolve()
+        doc_filepath = Path(paths["output"]).resolve()
         doc = word.Documents.Open(str(docx_filepath))
-        doc.SaveAs(str(pdf_filepath), FileFormat=wdFormatPDF)
+        doc.SaveAs(str(doc_filepath), FileFormat=wdformatdocument)
         doc.Close(0)
         pbar.update(1)
 
@@ -89,11 +90,11 @@ def resolve_paths(input_path, output_path):
         assert str(input_path).endswith((".docx", ".DOCX", ".doc", ".DOC"))
         output["input"] = str(input_path)
         if output_path and output_path.is_dir():
-            output_path = str(output_path / (str(input_path.stem) + ".pdf"))
+            output_path = str(output_path / (str(input_path.stem) + ".doc"))
         elif output_path:
-            assert str(output_path).endswith(".pdf")
+            assert str(output_path).endswith(".doc")
         else:
-            output_path = str(input_path.parent / (str(input_path.stem) + ".pdf"))
+            output_path = str(input_path.parent / (str(input_path.stem) + ".doc"))
         output["output"] = output_path
     return output
 
@@ -106,12 +107,11 @@ def convert(input_path, output_path=None, keep_active=False):
         return windows(paths, keep_active)
     else:
         raise NotImplementedError(
-            "docx2pdf is not implemented for linux as it requires Microsoft Word to be installed"
+            "docx2doc is not implemented for linux as it requires Microsoft Word to be installed"
         )
 
 
 def cli():
-
     import textwrap
     import argparse
 
@@ -123,20 +123,20 @@ def cli():
         """
     Example Usage:
 
-    Convert single docx file in-place from myfile.docx to myfile.pdf:
-        docx2pdf myfile.docx
+    Convert single docx file in-place from myfile.docx to myfile.doc:
+        docx2doc myfile.docx
 
-    Batch convert docx folder in-place. Output PDFs will go in the same folder:
-        docx2pdf myfolder/
+    Batch convert docx folder in-place. Output docs will go in the same folder:
+        docx2doc myfolder/
 
     Convert single docx file with explicit output filepath:
-        docx2pdf input.docx output.docx
+        docx2doc input.docx output.docx
 
     Convert single docx file and output to a different explicit folder:
-        docx2pdf input.docx output_dir/
+        docx2doc input.docx output_dir/
 
-    Batch convert docx folder. Output PDFs will go to a different explicit folder:
-        docx2pdf input_dir/ output_dir/
+    Batch convert docx folder. Output docs will go to a different explicit folder:
+        docx2doc input_dir/ output_dir/
     """
     )
 
